@@ -1,0 +1,223 @@
+{% extends "layout.html" %}
+{% block content %}
+	<style>
+
+	strong{
+	  font-size: 12px;
+	}
+	body {
+	  font: 10px sans-serif;
+	}
+
+	.axis path,
+	.axis line {
+	  fill: none;
+	  stroke: #000;
+	  shape-rendering: crispEdges;
+	}
+
+	.bar {
+	  fill: rgb(51,204,255);
+	}
+
+	.bar:hover {
+	  fill: rgb(132,224,255);
+	}
+
+	.x.axis path {
+	  display: none;
+	}
+
+	.d3-tip {
+	  line-height: 1;
+	  font-weight: bold;
+	  padding: 12px;
+	  background: rgba(0, 0, 0, 0.8);
+	  color: #fff;
+	  border-radius: 2px;
+	}
+
+
+	/* Creates a small triangle extender for the tooltip */
+	.d3-tip:after {
+	  box-sizing: border-box;
+	  display: inline;
+	  font-size: 10px;
+	  width: 100%;
+	  line-height: 1;
+	  color: rgba(0, 0, 0, 0.8);
+	  content: "\25BC";
+	  position: absolute;
+	  text-align: center;
+	}
+
+	/* Style northward tooltips differently */
+	.d3-tip.n:after {
+	  margin: -1px 0 0 0;
+	  top: 100%;
+	  left: 0;
+	}
+	</style>
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<script src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+  <div class="jumbo">
+  	<form name="form" action="/result" method="get">
+  		<br/>
+		<input type="text" name="query" value="{{ query }}"></input>
+		<!--<input type="submit" value="Submit"></input>-->
+	</form>
+
+	<br/>
+    <body>
+    <strong align="center" style="font-size:16pt;">{{ query }}</strong>
+    <div id="graph" style="margin-left:auto; margin-right:auto; width:100%"></div>
+
+<script>
+
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+var x = d3.scale.ordinal()
+    .rangeRoundBands([0, width], .1);
+
+var y = d3.scale.linear()
+    .rangeRound([height, 0]);
+
+var color = d3.scale.ordinal()
+    .range(["rgb(60,71,119)", "rgb(60,71,119)", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]); //twitterblue rgb(51,204,255) darkblue rgb(60,71,119)
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
+
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+    .tickFormat(d3.format(".2s"));
+
+var tip = d3.tip()
+  .attr('class', 'd3-tip')
+  .offset([-10, 0])
+  .html(function(d) {
+    return "<strong>Positive:</strong> <span style='font-size:12px;color:rgb(132,224,255)'>" + d.Positive + "</span>";
+    /*return "<strong>Positive:</strong> <span style='color:orangered'>" + d.Positive + "<br/>TweetExample: @KingJames you destroyed Paul George tonight" + "</span>";*/
+  })
+
+var svg = d3.select("#graph").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+svg.call(tip);
+
+//d3.csv("{{ url_for('static', filename=datafile) }}", function(error, data) {
+data = [
+		{
+			"Day": String({{ monthlist[0] }}).concat("/").concat(String({{ daylist[0] }})),
+			"Positive": {{ positive_info[0] }},  
+			"Negative": {{ negative_info[0] }} 
+		},
+		{
+			"Day": String({{ monthlist[1] }}).concat("/").concat(String({{ daylist[1] }})),
+			"Positive": {{ positive_info[1] }},
+			"Negative": {{ negative_info[1] }} 
+		},
+		{
+			"Day": String({{ monthlist[2] }}).concat("/").concat(String({{ daylist[2] }})),
+			"Positive": {{ positive_info[2] }},
+			"Negative": {{ negative_info[2] }}
+		},
+		{
+			"Day": String({{ monthlist[3] }}).concat("/").concat(String({{ daylist[3] }})), 
+			"Positive": {{ positive_info[3] }},
+			"Negative": {{ negative_info[3] }}
+		},
+		{
+			"Day": String({{ monthlist[4] }}).concat("/").concat(String({{ daylist[4] }})),
+			"Positive": {{ positive_info[4] }},
+			"Negative": {{ negative_info[4] }}
+		},
+		{
+			"Day": String({{ monthlist[5] }}).concat("/").concat(String({{ daylist[5] }})),
+			"Positive": {{ positive_info[5] }},
+			"Negative": {{ negative_info[5] }}
+		},
+		{
+			"Day": String({{ monthlist[6] }}).concat("/").concat(String({{ daylist[6] }})),
+			"Positive": {{ positive_info[6] }},
+			"Negative": {{ negative_info[6] }}
+		}
+	];
+
+  color.domain(d3.keys(data[0]).filter(function(key) { return key !== "Day"; }));
+
+  data.forEach(function(d) {
+    var y0 = 0;
+    d.ages = color.domain().map(function(name) { return {name: name, y0: y0, y1: y0 += +d[name]}; });
+    d.total = d.ages[d.ages.length - 1].y1;
+  });
+
+  data.sort(function(a, b) { return b.total - a.total; });
+
+  x.domain(data.map(function(d) { return d.Day; }));
+  y.domain([0, d3.max(data, function(d) { return d.total; })]);
+
+  // x axis
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  // y axis
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end");
+      //.text("Mood");
+
+  //wtf everything
+  var day = svg.selectAll(".day")
+    .data(data)
+    .enter().append("g")
+    .attr("class", "g")
+    .attr("transform", function(d) { return "translate(" + (x(d.Day)) + ",0)"; });
+
+  //top blue part
+  day.selectAll("rect")
+    .data(function(d) { return d.ages; })
+    .enter().append("rect")
+    .attr("width", x.rangeBand())
+    .attr("y", function(d) { return y(d.y1); })
+    .attr("height", function(d) { return y(d.y0) - y(d.y1); })
+    .style("fill", function(d) { return color(d.name); });
+
+  // makes tooltips work
+  svg.selectAll(".bar")
+      .data(data)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", function(d) { return x(d.Day); })
+      .attr("width", x.rangeBand())
+      .attr("y", function(d) {return height; })
+      .attr("height", function(d) {return 0;})
+      //.attr("y", function(d) { return y(d.Positive); })
+      //.attr("height", function(d) { return height - y(d.Positive); })
+      .on('mouseover', tip.show)
+      .on('mouseout', tip.hide)
+      .transition()
+      .attr("y", function(d) { return y(d.Positive); })
+      .attr("height", function(d) { return height - y(d.Positive); })
+      .duration(1500);
+//});
+
+</script>
+
+  </div>
+{% endblock %}

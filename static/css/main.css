@@ -1,0 +1,87 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: #444;
+}
+ 
+/*
+ * Create dark grey header with a white logo
+ */
+  
+body {
+  background-color: rgb(39,40,34);
+  height: 500px;
+  width: 100%;
+  opacity: .9;
+  margin-bottom: 10px;
+}
+ 
+.logo {
+  margin: 0;
+  font-size: 5em;
+  color: #fff;
+  text-transform: lowercase;
+  float: center;
+  text-decoration: none;
+  background-color: rgb(39,40,34);
+}
+ 
+body h1.logo:hover {
+  color: #fff;
+  text-decoration: none;
+}
+
+a:hover, a:visited, a:link, a:active
+{
+    background-color: rgb(39,40,34);
+    text-decoration: none;
+}
+
+/*
+ * Center the body content
+ */
+  
+.container {
+  width: 940px;
+  margin: 0 auto;
+}
+ 
+div.jumbo {
+  padding: 10px 0 30px 0;
+  background-color: #eeeeee;
+  -webkit-border-radius: 6px;
+     -moz-border-radius: 6px;
+          border-radius: 6px;
+  text-align:center;
+  font-size:1.7em;
+}
+ 
+h2 {
+  font-size: 2em;
+  margin-top: 40px;
+  text-align: center;
+  letter-spacing: -2px;
+}
+ 
+h3 {
+  font-size: 1.7em;
+  font-weight: 100;
+  margin-top: 30px;
+  text-align: center;
+  letter-spacing: -1px;
+  color: #999;
+}
+
+input
+{
+  -moz-border-radius: 15px;
+    border-radius: 15px;
+    border:solid 1px gray;
+    padding:5px;
+    width:80%;
+    outline:none;
+    font-size:1em;
+}
+
+:focus {outline:none;background-color:#E0E0EB}
